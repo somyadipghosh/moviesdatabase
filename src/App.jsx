@@ -26,7 +26,7 @@ function App() {
   const searchInputRef = useRef(null);
   const suggestionsRef = useRef(null);
 
-  const apiKey = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkYjg4YTQ0NWVhOTBiNjkzNDNhMDkwZTllNzUzMTBjOCIsIm5iZiI6MTcyMTQwMTkzNC40NTEsInN1YiI6IjY2OWE4MjRlZjFiMzBjZDZiODRhYTI3YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.MUQrwan_0FHgXn6WrNsoCyuB3VXTCGp83B_ZFR4CDzs';
+  const apiKey = import.meta.env.VITE_TMDB_API_KEY;
   
   // Categories and subcategories definition
   const categories = [
