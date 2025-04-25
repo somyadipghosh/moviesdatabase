@@ -109,31 +109,31 @@ function App() {
     }
     
     try {
-      // Get movie suggestions
-      const movieResponse = await axios.get('https://api.themoviedb.org/3/search/movie', {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        params: {
-          query: query,
-          page: 1,
-          include_adult: false
-        }
-      });
-      
-      // Get TV show suggestions
-      const tvResponse = await axios.get('https://api.themoviedb.org/3/search/tv', {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        params: {
-          query: query,
-          page: 1,
-          include_adult: false
-        }
-      });
+      // Fetch movie and TV suggestions in parallel using Promise.all
+      const [movieResponse, tvResponse] = await Promise.all([
+        axios.get('https://api.themoviedb.org/3/search/movie', {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          params: {
+            query: query,
+            page: 1,
+            include_adult: false
+          }
+        }),
+        axios.get('https://api.themoviedb.org/3/search/tv', {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          params: {
+            query: query,
+            page: 1,
+            include_adult: false
+          }
+        })
+      ]);
       
       // Format TV results
       const formattedTvResults = tvResponse.data.results.map(show => ({
@@ -160,15 +160,26 @@ function App() {
     }
   };
 
+  // State to track if suggestions are loading
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
   // Debounce function to limit API calls while typing
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchTerm) {
-        fetchSearchSuggestions(searchTerm);
-      }
-    }, 500);
+    if (searchTerm.length < 2) {
+      setSearchSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
     
-    return () => clearTimeout(timeoutId);
+    setSuggestionsLoading(true);
+    const timeoutId = setTimeout(() => {
+      fetchSearchSuggestions(searchTerm);
+      setSuggestionsLoading(false);
+    }, 300); // Reduced from 500ms to 300ms for faster response
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [searchTerm]);
 
   // Handle clicks outside of suggestions to close the dropdown
@@ -728,53 +739,69 @@ function App() {
               )}
             </div>
           </div>
-          
-          <form onSubmit={searchContent} className="search-form">
-            <div className="search-input-container">
-              <input
-                type="text"
-                placeholder="Search for movies & TV shows..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => searchTerm && setShowSuggestions(true)}
-                ref={searchInputRef}
-              />
-              {showSuggestions && searchSuggestions.length > 0 && (
-                <div className="search-suggestions" ref={suggestionsRef}>
-                  {searchSuggestions.map(suggestion => (
-                    <div 
-                      key={`${suggestion.id}-${suggestion.media_type}`} 
-                      className="search-suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <div className="suggestion-poster">
-                        {suggestion.poster_path ? (
-                          <img 
-                            src={`https://image.tmdb.org/t/p/w92${suggestion.poster_path}`} 
-                            alt={suggestion.title}
-                          />
-                        ) : (
-                          <div className="suggestion-no-image"></div>
-                        )}
+          <div className="search-container">
+            <form onSubmit={searchContent} className="search-form">
+              <div className="search-input-container">
+                <input
+                  type="text"
+                  placeholder="Search for movies & TV shows..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => searchTerm && setShowSuggestions(true)}
+                  ref={searchInputRef}
+                />
+                {searchTerm.length >= 2 && showSuggestions && (
+                  <div className="search-suggestions" ref={suggestionsRef}>
+                    {suggestionsLoading ? (
+                      <div className="suggestion-loading">
+                        <div className="suggestion-spinner"></div>
+                        <p>Finding matches...</p>
                       </div>
-                      <div className="suggestion-info">
-                        <div className="suggestion-title">{suggestion.title}</div>
-                        <div className="suggestion-details">
-                          <span className="suggestion-year">
-                            {suggestion.release_date ? new Date(suggestion.release_date).getFullYear() : 'N/A'}
-                          </span>
-                          <span className="suggestion-type">
-                            {suggestion.media_type === 'tv' ? 'TV Show' : 'Movie'}
-                          </span>
+                    ) : searchSuggestions.length > 0 ? (
+                      searchSuggestions.map(suggestion => (
+                        <div 
+                          key={`${suggestion.id}-${suggestion.media_type}`} 
+                          className="search-suggestion-item"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          <div className="suggestion-poster">
+                            {suggestion.poster_path ? (
+                              <img 
+                                src={`https://image.tmdb.org/t/p/w92${suggestion.poster_path}`} 
+                                alt={suggestion.title}
+                              />
+                            ) : (
+                              <div className="suggestion-no-image"></div>
+                            )}
+                          </div>
+                          <div className="suggestion-info">
+                            <div className="suggestion-title">{suggestion.title}</div>
+                            <div className="suggestion-details">
+                              <span className="suggestion-year">
+                                {suggestion.release_date ? new Date(suggestion.release_date).getFullYear() : 'N/A'}
+                              </span>
+                              <span className="suggestion-type">
+                                {suggestion.media_type === 'tv' ? 'TV Show' : 'Movie'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button type="submit">Search</button>
-          </form>
+                      ))
+                    ) : (
+                      <div className="no-suggestions">No results found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button type="submit" className="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </div>
           
           <button 
             className="theme-toggle" 

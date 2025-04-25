@@ -272,14 +272,20 @@ body {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+.search-container {
+  position: relative;
+  margin: 0 20px;
+  flex-grow: 0.4;
+  max-width: 600px;
+}
+
 .search-form {
   display: flex;
-  min-width: 300px;
-  max-width: 600px;
-  flex-grow: 0.3;
+  width: 100%;
   position: relative;
+  gap: 10px;
   border-radius: var(--border-radius);
-  overflow: visible; /* Changed from hidden to allow dropdown to be visible */
+  overflow: visible;
 }
 
 .search-input-container {
@@ -289,45 +295,102 @@ body {
 
 .search-form input {
   width: 100%;
-  padding: 12px 15px;
-  border: none;
-  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  padding: 12px 20px;
+  border: 2px solid transparent;
+  border-radius: var(--border-radius);
   font-size: 16px;
   outline: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: var(--input-bg);
   color: var(--input-text);
+  transition: all 0.3s ease;
 }
 
-.search-form button {
-  padding: 12px 20px;
-  background-color: var(--secondary-color);
+.search-form input:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-form input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(1, 180, 228, 0.2);
+}
+
+.search-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 25px;
+  background: linear-gradient(135deg, var(--secondary-color), #0288d1);
   color: white;
   border: none;
-  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 16px;
-  font-weight: 500;
-  transition: background-color 0.3s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
-.search-form button:hover {
-  background-color: #0099c9;
+.search-button svg {
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease;
 }
 
-/* Search Suggestions Styling */
+.search-button:hover {
+  background: linear-gradient(135deg, #02a7d3, #0277bd);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.search-button:hover svg {
+  transform: scale(1.1);
+}
+
+.search-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Add a subtle ripple effect on click */
+.search-button::after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.4) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 1s;
+}
+
+.search-button:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
 .search-suggestions {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   background-color: var(--card-color);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1050;
   max-height: 400px;
   overflow-y: auto;
-  margin-top: 5px;
+  margin-top: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .search-suggestion-item {
@@ -410,6 +473,36 @@ body {
 
 .suggestion-type:contains('TV') {
   background-color: var(--tv-badge-color);
+}
+
+.suggestion-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.suggestion-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(1, 180, 228, 0.2);
+  border-top-color: var(--secondary-color);
+  border-radius: 50%;
+  animation: suggestion-spin 0.8s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes suggestion-spin {
+  to { transform: rotate(360deg); }
+}
+
+.no-suggestions {
+  padding: 15px;
+  text-align: center;
+  color: var(--text-light);
+  font-style: italic;
 }
 
 /* Content container */
