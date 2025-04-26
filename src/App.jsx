@@ -916,6 +916,45 @@ function App() {
     }
   };
   
+  // Function to get filmmaker details without showing loading spinner
+  const getFilmmakerDetails = async (personId) => {
+    try {
+      // Get person details
+      const personResponse = await axios.get(`https://api.themoviedb.org/3/person/${personId}`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Get person movie credits
+      const creditsResponse = await axios.get(`https://api.themoviedb.org/3/person/${personId}/combined_credits`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Fetch awards information
+      const awardsData = await fetchArtistAwards(personId, personResponse.data.name, creditsResponse.data);
+      
+      // Format and set selected artist data
+      const artistData = {
+        ...personResponse.data,
+        credits: creditsResponse.data,
+        awards: awardsData
+      };
+      
+      setSelectedArtist(artistData);
+      setArtistModalOpen(true);
+      
+    } catch (err) {
+      console.error('Error fetching filmmaker details:', err);
+      // Show a small toast or notification instead of the full error
+      // This keeps the UI cleaner for incidental clicks
+    }
+  };
+  
   // Function to determine notable awards for an artist based on their work and popularity
   // This is a simulation since TMDB doesn't provide dedicated awards data
   const fetchArtistAwards = async (personId, personName, credits) => {
@@ -1716,12 +1755,47 @@ function App() {
                   )}
                   {selectedMovie.directors && selectedMovie.directors.length > 0 && (
                     <p className="directors">
-                      <strong>Director{selectedMovie.directors.length > 1 ? 's' : ''}:</strong> {selectedMovie.directors.join(', ')}
+                      <strong>Director{selectedMovie.directors.length > 1 ? 's' : ''}:</strong>{' '}
+                      {selectedMovie.credits && selectedMovie.credits.crew && 
+                        selectedMovie.credits.crew
+                          .filter(person => person.job === 'Director')
+                          .map((director, index, array) => (
+                            <span key={director.id}>
+                              <span 
+                                className="clickable-name" 
+                                onClick={() => getFilmmakerDetails(director.id)}
+                                style={{ cursor: 'pointer', color: 'var(--secondary-color)' }}
+                              >
+                                {director.name}
+                              </span>
+                              {index < array.length - 1 ? ', ' : ''}
+                            </span>
+                          ))
+                      }
                     </p>
                   )}
                   {selectedMovie.media_type === 'tv' && selectedMovie.creators && selectedMovie.creators.length > 0 && (
                     <p className="creators">
-                      <strong>Creator{selectedMovie.creators.length > 1 ? 's' : ''}:</strong> {selectedMovie.creators.join(', ')}
+                      <strong>Creator{selectedMovie.creators.length > 1 ? 's' : ''}:</strong>{' '}
+                      {selectedMovie.credits && selectedMovie.credits.crew && 
+                        selectedMovie.credits.crew
+                          .filter(person => person.job === 'Creator' || person.job === 'Executive Producer')
+                          .filter((person, index, self) => 
+                            index === self.findIndex(p => p.name === person.name)
+                          )
+                          .map((creator, index, array) => (
+                            <span key={creator.id}>
+                              <span 
+                                className="clickable-name" 
+                                onClick={() => getFilmmakerDetails(creator.id)}
+                                style={{ cursor: 'pointer', color: 'var(--secondary-color)' }}
+                              >
+                                {creator.name}
+                              </span>
+                              {index < array.length - 1 ? ', ' : ''}
+                            </span>
+                          ))
+                      }
                     </p>
                   )}
                   {selectedMovie.production_companies && selectedMovie.production_companies.length > 0 && (
@@ -1974,6 +2048,7 @@ function App() {
                 setSelectedMovie(null);
                 fetchTrendingContent();
               }}>Home</a></li>
+
               <li><a href="#" onClick={(e) => {
                 e.preventDefault();
                 getMoviesByCollection('popular', 'Popular Movies');
@@ -2154,3 +2229,4 @@ function App() {
 }
 
 export default App
+
