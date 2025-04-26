@@ -8,6 +8,7 @@
   --card-color: #fff;
   --text-color: #333;
   --text-light: #6c757d;
+  --secondary-text: #6c757d;
   --error-color: #e74c3c;
   --success-color: #2ecc71;
   --rating-color: #f39c12;
@@ -26,6 +27,10 @@
   --subcategory-border: #eee;
   --category-name-bg: #f5f5f5;
   --category-name-color: var(--primary-color);
+  --bg-color: #fff;
+  --card-bg: #f5f5f5;
+  --border-color: #e0e0e0;
+  --hover-color: #e9e9e9;
 }
 
 /* Dark theme variables */
@@ -36,6 +41,7 @@
   --card-color: #1f1f1f;
   --text-color: #e0e0e0;
   --text-light: #aaaaaa;
+  --secondary-text: #aaaaaa;
   --rating-color: #ffd700;
   --movie-badge-color: #003366;
   --tv-badge-color: #4b2e83;
@@ -51,6 +57,10 @@
   --category-name-bg: #333;
   --category-name-color: #64b5f6; /* Brighter category title color for dark mode */
   --title-color: #64b5f6; /* Brighter title color for dark mode */
+  --bg-color: #1f1f1f;
+  --card-bg: #2a2a2a;
+  --border-color: #444;
+  --hover-color: #333;
 }
 
 /* Theme transition animation */
@@ -1587,5 +1597,392 @@ body {
   
   .categories-menu {
     max-height: 65vh;
+  }
+}
+
+/* Artist Modal Styles */
+.artist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  padding: 20px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.artist-modal-overlay.closing {
+  opacity: 0;
+}
+
+.artist-modal {
+  background-color: var(--bg-color);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  animation: modal-appear 0.3s ease-out;
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.closing .artist-modal {
+  transform: translateY(20px);
+}
+
+@keyframes modal-appear {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.artist-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background-color 0.2s;
+}
+
+.artist-modal-close:hover {
+  background-color: rgba(200, 0, 0, 0.8);
+}
+
+.artist-modal-content {
+  padding: 25px;
+}
+
+.artist-header {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.artist-header img {
+  width: 200px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.artist-no-image {
+  width: 200px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #555;
+  color: white;
+  font-size: 48px;
+  border-radius: 8px;
+}
+
+.artist-info {
+  flex: 1;
+}
+
+.artist-info h2 {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+
+.artist-birth, .artist-death, .artist-department, .artist-popularity {
+  margin-bottom: 10px;
+  color: var(--secondary-text);
+  font-size: 1rem;
+}
+
+.artist-birth strong, .artist-death strong, .artist-department strong, .artist-popularity strong {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.artist-bio {
+  margin-bottom: 30px;
+}
+
+.artist-bio h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.artist-bio p {
+  line-height: 1.6;
+  color: var(--secondary-text);
+  margin-bottom: 20px;
+  white-space: pre-line;
+}
+
+.artist-filmography h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.filmography-tabs {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.filmography-tab {
+  padding: 8px 16px;
+  border: none;
+  background: var(--card-bg);
+  color: var(--text-color);
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filmography-tab.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.filmography-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filmography-item {
+  display: flex;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filmography-item:hover {
+  background-color: var(--hover-color);
+}
+
+.filmography-poster {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.filmography-poster img {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.film-no-poster {
+  width: 60px;
+  height: 90px;
+  background-color: #555;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filmography-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.filmography-details h4 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.dark .filmography-details h4 {
+  color: white;
+}
+
+.film-character {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.dark .film-character {
+  color: #64b5f6; /* Brighter blue for dark mode */
+}
+
+.film-year {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.dark .film-year {
+  color: #ccc; /* Lighter gray for dark mode */
+}
+
+/* Make cast cards clickable with visual feedback */
+.cast-member {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.cast-member:hover {
+  transform: translateY(-5px);
+}
+
+.cast-member:after {
+  content: "View details";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 5px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.cast-member:hover:after {
+  opacity: 1;
+}
+
+/* Artist Awards Section Styling */
+.artist-awards {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.dark .artist-awards {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.artist-awards h3 {
+  margin-top: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark .artist-awards h3 {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.awards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.award-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.award-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .award-item {
+  background-color: rgba(30, 30, 30, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .award-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.award-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  color: gold;
+}
+
+.award-details {
+  flex: 1;
+}
+
+.award-details h4 {
+  margin: 0 0 0.25rem 0;
+  color: #111;
+  font-size: 1rem;
+}
+
+.dark .award-details h4 {
+  color: #f0f0f0;
+}
+
+.award-category {
+  color: #555;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0 0 0.25rem 0;
+}
+
+.dark .award-category {
+  color: #aaa;
+}
+
+.award-work {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #333;
+}
+
+.dark .award-work {
+  color: #ccc;
+}
+
+@media (max-width: 600px) {
+  .awards-list {
+    gap: 0.75rem;
+  }
+  
+  .award-item {
+    padding: 0.5rem;
+  }
+  
+  .award-icon {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
   }
 }
