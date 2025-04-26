@@ -565,6 +565,30 @@ function App() {
       // Format content details based on media type
       let formattedDetails = contentDetails.data;
       
+      // Find directors from crew for movies, or creators/showrunners for TV shows
+      let directors = [];
+      let creators = [];
+      if (contentCredits.data && contentCredits.data.crew) {
+        if (mediaType === 'movie') {
+          // For movies, find crew members with job "Director"
+          directors = contentCredits.data.crew
+            .filter(person => person.job === 'Director')
+            .map(person => person.name);
+        } else {
+          // For TV shows, find both directors and creators separately
+          directors = contentCredits.data.crew
+            .filter(person => person.job === 'Director')
+            .map(person => person.name);
+          
+          creators = contentCredits.data.crew
+            .filter(person => person.job === 'Creator' || person.job === 'Executive Producer')
+            .map(person => person.name);
+          
+          // Remove duplicates that might occur if someone is both Creator and Executive Producer
+          creators = [...new Set(creators)];
+        }
+      }
+      
       if (mediaType === 'tv') {
         formattedDetails = {
           ...contentDetails.data,
@@ -573,12 +597,15 @@ function App() {
           runtime: contentDetails.data.episode_run_time && contentDetails.data.episode_run_time.length > 0 
             ? contentDetails.data.episode_run_time[0] 
             : null,
-          media_type: 'tv'
+          media_type: 'tv',
+          directors: directors,
+          creators: creators
         };
       } else {
         formattedDetails = {
           ...contentDetails.data,
-          media_type: 'movie'
+          media_type: 'movie',
+          directors: directors
         };
       }
       
@@ -1292,6 +1319,16 @@ function App() {
                   {selectedMovie.media_type === 'movie' && selectedMovie.revenue > 0 && (
                     <p className="revenue">
                       <strong>Revenue:</strong> ${(selectedMovie.revenue).toLocaleString()}
+                    </p>
+                  )}
+                  {selectedMovie.directors && selectedMovie.directors.length > 0 && (
+                    <p className="directors">
+                      <strong>Director{selectedMovie.directors.length > 1 ? 's' : ''}:</strong> {selectedMovie.directors.join(', ')}
+                    </p>
+                  )}
+                  {selectedMovie.media_type === 'tv' && selectedMovie.creators && selectedMovie.creators.length > 0 && (
+                    <p className="creators">
+                      <strong>Creator{selectedMovie.creators.length > 1 ? 's' : ''}:</strong> {selectedMovie.creators.join(', ')}
                     </p>
                   )}
                   {selectedMovie.production_companies && selectedMovie.production_companies.length > 0 && (
