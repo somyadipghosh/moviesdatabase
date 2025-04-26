@@ -21,9 +21,11 @@
   --input-bg: #fff;
   --input-text: #333;
   --suggestion-hover: #f5f5f5;
+  --suggestion-title-color: var(--primary-color);
   --subcategory-bg: #f8f9fa;
   --subcategory-border: #eee;
   --category-name-bg: #f5f5f5;
+  --category-name-color: var(--primary-color);
 }
 
 /* Dark theme variables */
@@ -43,10 +45,12 @@
   --input-bg: #2a2a2a;
   --input-text: #e0e0e0;
   --suggestion-hover: #333;
+  --suggestion-title-color: #64b5f6; /* Added brighter suggestion title color for dark mode */
   --subcategory-bg: #2a2a2a;
   --subcategory-border: #444;
   --category-name-bg: #333;
-  --title-color: #64b5f6; /* Added brighter title color for dark mode */
+  --category-name-color: #64b5f6; /* Brighter category title color for dark mode */
+  --title-color: #64b5f6; /* Brighter title color for dark mode */
 }
 
 /* Theme transition animation */
@@ -237,8 +241,9 @@ body {
   padding: 15px;
   background-color: var(--category-name-bg);
   font-weight: 600;
-  color: var(--primary-color);
-  border-bottom: 1px solid #eee;
+  color: var(--category-name-color);
+  border-bottom: 1px solid var(--subcategory-border);
+  letter-spacing: 0.5px;
 }
 
 .subcategories {
@@ -446,7 +451,7 @@ body {
 .suggestion-title {
   font-weight: 500;
   margin-bottom: 4px;
-  color: var(--primary-color);
+  color: var(--suggestion-title-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1509,7 +1514,6 @@ body {
   }
 }
 
-/* Small Mobile Adjustments */
 @media (max-width: 480px) {
   .navbar-container {
     padding: 0 0.8rem;
