@@ -67,7 +67,7 @@ The build artifacts will be stored in the `dist/` directory.
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/moviesdatabase/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/somyadipghosh/moviesdatabase/issues).
 
 ## 📄 License
 
