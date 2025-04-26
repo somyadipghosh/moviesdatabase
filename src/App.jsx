@@ -22,9 +22,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [lastQuery, setLastQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const categoryMenuRef = useRef(null);
   const searchInputRef = useRef(null);
   const suggestionsRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
   
@@ -78,6 +81,37 @@ function App() {
         { id: 'top_rated', name: 'Top Rated' },
         { id: 'on_the_air', name: 'On The Air' },
         { id: 'airing_today', name: 'Airing Today' },
+      ]
+    },
+    {
+      name: 'Hollywood Movies',
+      subcategories: [
+        { id: 'us_action', name: 'Action Movies' },
+        { id: 'us_comedy', name: 'Comedy Movies' },
+        { id: 'us_drama', name: 'Drama Movies' },
+        { id: 'us_scifi', name: 'Sci-Fi Movies' },
+        { id: 'us_horror', name: 'Horror Movies' },
+      ]
+    },
+    {
+      name: 'Bollywood Movies',
+      subcategories: [
+        { id: 'bollywood_action', name: 'Action Films' },
+        { id: 'bollywood_romance', name: 'Romance Films' },
+        { id: 'bollywood_drama', name: 'Drama Films' },
+        { id: 'bollywood_comedy', name: 'Comedy Films' },
+        { id: 'bollywood_thriller', name: 'Thriller Films' },
+      ]
+    },
+    {
+      name: 'Japanese Anime',
+      subcategories: [
+        { id: 'anime_series', name: 'Anime Series' },
+        { id: 'anime_movies', name: 'Anime Movies' },
+        { id: 'anime_action', name: 'Action Anime' },
+        { id: 16, name: 'Animation' },
+        { id: 'anime_fantasy', name: 'Fantasy Anime' },
+        { id: 'anime_scifi', name: 'Sci-Fi Anime' },
       ]
     }
   ];
@@ -657,6 +691,24 @@ function App() {
       if (genreId) {
         getTvShowsByGenre(genreId, genreName, page);
       }
+    } else if (currentView.startsWith('hollywood:')) {
+      const categoryName = currentView.split(':')[1];
+      const categoryId = categories[4].subcategories.find(c => c.name === categoryName)?.id;
+      if (categoryId) {
+        getHollywoodMovies(categoryId, categoryName, page);
+      }
+    } else if (currentView.startsWith('bollywood:')) {
+      const categoryName = currentView.split(':')[1];
+      const categoryId = categories[5].subcategories.find(c => c.name === categoryName)?.id;
+      if (categoryId) {
+        getBollywoodMovies(categoryId, categoryName, page);
+      }
+    } else if (currentView.startsWith('anime:')) {
+      const categoryName = currentView.split(':')[1];
+      const categoryId = categories[6].subcategories.find(c => c.name === categoryName)?.id;
+      if (categoryId) {
+        getJapaneseAnime(categoryId, categoryName, page);
+      }
     }
   };
 
@@ -680,20 +732,257 @@ function App() {
     return pageNumbers;
   };
 
+  // Function to get Hollywood movies
+  const getHollywoodMovies = async (categoryId, categoryName, page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSelectedMovie(null);
+      setCategoryMenuOpen(false);
+      setCurrentView(`hollywood:${categoryName}`);
+      setContentType('movie');
+      
+      // Map the category ID to the appropriate parameters
+      let params = {
+        page: page,
+        sort_by: 'popularity.desc',
+        with_original_language: 'en', // English language
+        region: 'US'                  // US region
+      };
+      
+      // Add genre IDs based on category
+      switch (categoryId) {
+        case 'us_action':
+          params.with_genres = 28; // Action genre
+          break;
+        case 'us_comedy':
+          params.with_genres = 35; // Comedy genre
+          break;
+        case 'us_drama':
+          params.with_genres = 18; // Drama genre
+          break;
+        case 'us_scifi':
+          params.with_genres = 878; // Science Fiction genre
+          break;
+        case 'us_horror':
+          params.with_genres = 27; // Horror genre
+          break;
+        default:
+          break;
+      }
+      
+      const response = await axios.get('https://api.themoviedb.org/3/discover/movie', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        params: params
+      });
+      
+      // Add media_type to the results
+      const formattedResults = response.data.results.map(movie => ({
+        ...movie,
+        media_type: 'movie'
+      }));
+      
+      setMovies(formattedResults);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages);
+      scrollToTop();
+    } catch (err) {
+      setError(`Failed to fetch ${categoryName} movies. Please try again.`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Function to get Bollywood movies
+  const getBollywoodMovies = async (categoryId, categoryName, page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSelectedMovie(null);
+      setCategoryMenuOpen(false);
+      setCurrentView(`bollywood:${categoryName}`);
+      setContentType('movie');
+      
+      // Map the category ID to the appropriate parameters
+      let params = {
+        page: page,
+        sort_by: 'popularity.desc',
+        with_original_language: 'hi', // Hindi language
+        region: 'IN'                   // India region
+      };
+      
+      // Add genre IDs based on category
+      switch (categoryId) {
+        case 'bollywood_action':
+          params.with_genres = 28; // Action genre
+          break;
+        case 'bollywood_romance':
+          params.with_genres = 10749; // Romance genre
+          break;
+        case 'bollywood_drama':
+          params.with_genres = 18; // Drama genre
+          break;
+        case 'bollywood_comedy':
+          params.with_genres = 35; // Comedy genre
+          break;
+        case 'bollywood_thriller':
+          params.with_genres = 53; // Thriller genre
+          break;
+        default:
+          break;
+      }
+      
+      const response = await axios.get('https://api.themoviedb.org/3/discover/movie', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        params: params
+      });
+      
+      // Add media_type to the results
+      const formattedResults = response.data.results.map(movie => ({
+        ...movie,
+        media_type: 'movie'
+      }));
+      
+      setMovies(formattedResults);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages);
+      scrollToTop();
+    } catch (err) {
+      setError(`Failed to fetch ${categoryName} movies. Please try again.`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Function to get Japanese Anime content
+  const getJapaneseAnime = async (categoryId, categoryName, page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSelectedMovie(null);
+      setCategoryMenuOpen(false);
+      setCurrentView(`anime:${categoryName}`);
+      
+      // Determine if we're getting anime series or movies
+      const isMovie = categoryId === 'anime_movies';
+      setContentType(isMovie ? 'movie' : 'tv');
+      
+      // Map the category ID to the appropriate parameters
+      let params = {
+        page: page,
+        sort_by: 'popularity.desc',
+        with_original_language: 'ja', // Japanese language
+        with_keywords: isMovie ? null : 210024, // Anime keyword for TV shows
+      };
+      
+      // Add genre IDs based on category
+      switch (categoryId) {
+        case 'anime_action':
+          params.with_genres = isMovie ? 28 : 10759; // Action genre or Action & Adventure for TV
+          break;
+        case 'anime_fantasy':
+          params.with_genres = 14; // Fantasy genre
+          break;
+        case 'anime_scifi':
+          params.with_genres = 878; // Science Fiction genre
+          break;
+        default:
+          // For anime_series or anime_movies we don't add additional genre filters
+          break;
+      }
+      
+      const endpoint = isMovie ? 
+        'https://api.themoviedb.org/3/discover/movie' : 
+        'https://api.themoviedb.org/3/discover/tv';
+        
+      const response = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        params: params
+      });
+      
+      // Format results based on if it's movie or TV content
+      const formattedResults = response.data.results.map(item => {
+        if (!isMovie) {
+          return {
+            ...item,
+            title: item.name,
+            release_date: item.first_air_date,
+            media_type: 'tv'
+          };
+        }
+        return {
+          ...item,
+          media_type: 'movie'
+        };
+      });
+      
+      setMovies(formattedResults);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages);
+      scrollToTop();
+    } catch (err) {
+      setError(`Failed to fetch ${categoryName}. Please try again.`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={`app ${theme} ${isThemeTransitioning ? 'transitioning' : ''}`}>
       {/* Navbar with search and categories */}
       <nav className="navbar">
         <div className="navbar-container">
           <div className="logo">
-            <h1>MoviesFlix</h1>
+            <h1 onClick={() => fetchTrendingContent()}>MoviesFlix</h1>
           </div>
           
-          <div className="nav-links">
-            <button className="nav-link active" onClick={() => {
-              setCategoryMenuOpen(false);
-              fetchTrendingContent();
-            }}>Home</button>
+          {/* Mobile Menu Toggle */}
+          <button 
+            className={`mobile-menu-toggle ${mobileMenuOpen ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          
+          {/* Mobile Search Toggle */}
+          <button 
+            className="mobile-search-toggle"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            aria-label="Toggle search"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          
+          {/* Nav Links - Desktop and Mobile Menu */}
+          <div className={`nav-links ${mobileMenuOpen ? 'mobile-menu-open' : ''}`} ref={mobileMenuRef}>
+            <button 
+              className="nav-link active" 
+              onClick={() => {
+                setCategoryMenuOpen(false);
+                fetchTrendingContent();
+                setMobileMenuOpen(false);
+              }}
+            >
+              Home
+            </button>
             
             <div className="categories-dropdown" ref={categoryMenuRef}>
               <button 
@@ -726,7 +1015,15 @@ function App() {
                                 getTvShowsByGenre(subcategory.id, subcategory.name);
                               } else if (category.name === 'TV Collections') {
                                 getTvShowsByCollection(subcategory.id, subcategory.name);
+                              } else if (category.name === 'Hollywood Movies') {
+                                getHollywoodMovies(subcategory.id, subcategory.name);
+                              } else if (category.name === 'Bollywood Movies') {
+                                getBollywoodMovies(subcategory.id, subcategory.name);
+                              } else if (category.name === 'Japanese Anime') {
+                                getJapaneseAnime(subcategory.id, subcategory.name);
                               }
+                              setCategoryMenuOpen(false);
+                              setMobileMenuOpen(false);
                             }}
                           >
                             {subcategory.name}
@@ -739,8 +1036,13 @@ function App() {
               )}
             </div>
           </div>
-          <div className="search-container">
-            <form onSubmit={searchContent} className="search-form">
+          
+          {/* Search Container - Desktop and Mobile */}
+          <div className={`search-container ${mobileSearchOpen ? 'mobile-search-open' : ''}`}>
+            <form onSubmit={(e) => {
+              searchContent(e);
+              setMobileSearchOpen(false);
+            }} className="search-form">
               <div className="search-input-container">
                 <input
                   type="text"
@@ -762,7 +1064,10 @@ function App() {
                         <div 
                           key={`${suggestion.id}-${suggestion.media_type}`} 
                           className="search-suggestion-item"
-                          onClick={() => handleSuggestionClick(suggestion)}
+                          onClick={() => {
+                            handleSuggestionClick(suggestion);
+                            setMobileSearchOpen(false);
+                          }}
                         >
                           <div className="suggestion-poster">
                             {suggestion.poster_path ? (
@@ -798,7 +1103,15 @@ function App() {
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <span>Search</span>
+                <span className="search-button-text">Search</span>
+              </button>
+              
+              <button 
+                type="button" 
+                className="mobile-search-close" 
+                onClick={() => setMobileSearchOpen(false)}
+              >
+                ✕
               </button>
             </form>
           </div>
