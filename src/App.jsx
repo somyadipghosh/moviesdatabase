@@ -756,6 +756,14 @@ function App() {
         }
       });
 
+      // Get content images (posters, backdrops)
+      const contentImages = await axios.get(`https://api.themoviedb.org/3/${contentType}/${id}/images`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       // Get content credits (cast and crew)
       const contentCredits = await axios.get(`https://api.themoviedb.org/3/${contentType}/${id}/credits`, {
         headers: {
@@ -852,6 +860,7 @@ function App() {
         ...formattedDetails,
         reviews: contentReviews.data.results,
         videos: contentVideos.data.results,
+        images: contentImages.data,
         credits: contentCredits.data,
         similar: formattedSimilar,
         awards: awardsData
@@ -1822,6 +1831,52 @@ function App() {
                 </div>
               )}
               
+              {/* Photos Section */}
+              {selectedMovie.images && (selectedMovie.images.backdrops || selectedMovie.images.posters) && (
+                <div className="photos-section">
+                  <h3>Photos Gallery</h3>
+                  <div className="photos-container">
+                    {/* Backdrops (wider images that show scenes) */}
+                    {selectedMovie.images.backdrops && selectedMovie.images.backdrops.length > 0 && (
+                      <div className="photos-group">
+                        <h4>Scene Images</h4>
+                        <div className="photos-grid">
+                          {selectedMovie.images.backdrops.slice(0, 8).map((image, index) => (
+                            <div key={`backdrop-${index}`} className="photo-item">
+                              <img 
+                                src={`https://image.tmdb.org/t/p/w780${image.file_path}`} 
+                                alt={`${selectedMovie.title} scene ${index + 1}`}
+                                loading="lazy"
+                                onClick={() => window.open(`https://image.tmdb.org/t/p/original${image.file_path}`, '_blank')}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Posters (promotional artwork) */}
+                    {selectedMovie.images.posters && selectedMovie.images.posters.length > 1 && (
+                      <div className="photos-group">
+                        <h4>Posters</h4>
+                        <div className="posters-grid">
+                          {selectedMovie.images.posters.slice(0, 6).map((image, index) => (
+                            <div key={`poster-${index}`} className="poster-item">
+                              <img 
+                                src={`https://image.tmdb.org/t/p/w342${image.file_path}`} 
+                                alt={`${selectedMovie.title} poster ${index + 1}`}
+                                loading="lazy"
+                                onClick={() => window.open(`https://image.tmdb.org/t/p/original${image.file_path}`, '_blank')}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
               {/* Cast Section */}
               {selectedMovie.credits && selectedMovie.credits.cast && selectedMovie.credits.cast.length > 0 && (
                 <div className="cast-section">
@@ -2031,6 +2086,7 @@ function App() {
                 </div>
               )}
               
+
               {/* Filmography Section */}
               {selectedArtist.credits && (
                 <>
@@ -2098,4 +2154,3 @@ function App() {
 }
 
 export default App
-
