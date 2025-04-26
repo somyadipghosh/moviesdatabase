@@ -729,6 +729,9 @@ function App() {
     try {
       setLoading(true);
       
+      // Scroll to top when a movie is clicked
+      scrollToTop();
+      
       // URL paths differ based on media type
       const contentType = mediaType === 'tv' ? 'tv' : 'movie';
       
