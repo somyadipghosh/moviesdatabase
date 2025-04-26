@@ -2040,7 +2040,6 @@ function App() {
                       <button className="filmography-tab active">All</button>
                     </div>
                     
-```jsx
                     <div className="filmography-list">
                       {selectedArtist.credits.cast && 
                         [...selectedArtist.credits.cast]
